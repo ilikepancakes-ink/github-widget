@@ -15,6 +15,13 @@ interface Repository {
   pushed_at: string;
 }
 
+interface GitHubEvent {
+  type: string;
+  repo?: {
+    name: string;
+  };
+}
+
 interface GitHubWidgetProps {
   username: string;
 }
@@ -49,12 +56,12 @@ export default function GitHubWidget({ username }: GitHubWidgetProps) {
         let orgRepos: Repository[] = [];
 
         if (eventsResponse.ok) {
-          const events = await eventsResponse.json();
+          const events: GitHubEvent[] = await eventsResponse.json();
 
           // Extract unique repository names from push events
           const orgRepoNames = new Set<string>();
 
-          events.forEach((event: any) => {
+          events.forEach((event) => {
             if (event.type === 'PushEvent' && event.repo && event.repo.name) {
               // Check if it's not the user's own repository
               if (!event.repo.name.startsWith(`${username}/`)) {
@@ -74,7 +81,7 @@ export default function GitHubWidget({ username }: GitHubWidgetProps) {
                   return repo;
                 }
               }
-            } catch (error) {
+            } catch {
               // Ignore individual repo fetch errors
             }
             return null;
